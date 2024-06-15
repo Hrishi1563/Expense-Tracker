@@ -1,6 +1,6 @@
 "use client";
-import { currencyFormatter } from "@/lib/utils";
-import ExpenseCatgeoryItem from "@/components/ExpenseCategoryitem";
+import { CurrencyFormatter } from "../lib/utils";
+import ExpenseCatgeoryItem from "../components/ExpenseCategoryItem";
 import { useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
@@ -12,7 +12,7 @@ const DUMMY = [
     id: 1,
     title: "Entertainment",
     color: "#000",
-    total: 400,
+    total: 100,
   },
   {
     id: 2,
@@ -39,7 +39,12 @@ export default function Home() {
   return (
     <>
       {modalIsOpen && (
-        <div className="absolute top-0 left-0 w-full h-full">
+        <div
+          style={{
+            transform: modalIsOpen ? "translateX(0%)" : "translateX(-200%)",
+          }}
+          className="absolute top-0 left-0 w-full h-full z-10 transition-all duration-500"
+        >
           <div className="container mx-auto max-w-2xl h-[80vh] rounded-3xl bg-slate-800 py-6 px-4">
             <button
               onClick={() => {
@@ -56,7 +61,7 @@ export default function Home() {
       <main className="container mx-auto px-6 py-6 max-w-2xl">
         <section>
           <small className="text-gray-400 text-md">My Balance</small>
-          <h2 className="text-4xl font-bold">{currencyFormatter(101)}</h2>
+          <h2 className="text-4xl font-bold">{CurrencyFormatter(101)}</h2>
         </section>
         <section className="flex items-center gap-2 py-3">
           <button
