@@ -4,7 +4,7 @@ import ExpenseCatgeoryItem from "../components/ExpenseCategoryItem";
 import { useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-
+import Modal from "../components/Modal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DUMMY = [
@@ -35,28 +35,36 @@ const DUMMY = [
 ];
 
 export default function Home() {
-  const [modalIsOpen, SetModal] = useState(false);
+  const [showIncomeModal, setIncomeModal] = useState(false);
   return (
     <>
-      {modalIsOpen && (
-        <div
-          style={{
-            transform: modalIsOpen ? "translateX(0%)" : "translateX(-200%)",
-          }}
-          className="absolute top-0 left-0 w-full h-full z-10 transition-all duration-500"
-        >
-          <div className="container mx-auto max-w-2xl h-[80vh] rounded-3xl bg-slate-800 py-6 px-4">
-            <button
-              onClick={() => {
-                SetModal(false);
-              }}
-              className="w-10 h-10 mb-4 font-bold rounded-full bg-slate-600"
-            >
-              X
-            </button>
+      <Modal show={showIncomeModal} onClose={setIncomeModal}>
+        <form className="input-grp">
+          <div className="input-grp">
+            <label htmlFor="amount"> Income Amount</label>
+            <input
+              className="px-4 py-2 bg-slate-600 rounded-xl"
+              type="number"
+              name="amount"
+              min={0.01}
+              step={0.01}
+              placeholder="Enter income amount"
+            />
           </div>
-        </div>
-      )}
+          <div className="flex flex-col gap-4">
+            <label htmlFor="description">Description</label>
+            <input
+              className="px-4 py-2 bg-slate-600 rounded-xl"
+              name="description"
+              type="text"
+              placeholder="Enter income descrition"
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">
+            Add Entry
+          </button>
+        </form>
+      </Modal>
 
       <main className="container mx-auto px-6 py-6 max-w-2xl">
         <section>
@@ -64,15 +72,17 @@ export default function Home() {
           <h2 className="text-4xl font-bold">{CurrencyFormatter(101)}</h2>
         </section>
         <section className="flex items-center gap-2 py-3">
-          <button
-            onClick={() => {
-              SetModal(true);
-            }}
-            className="btn btn-primary"
-          >
+          <button onClick={() => {}} className="btn btn-primary">
             +Expense
           </button>
-          <button className="btn btn-primary-outline">+Income</button>
+          <button
+            onClick={() => {
+              setIncomeModal(true);
+            }}
+            className="btn btn-primary-outline"
+          >
+            +Income
+          </button>
         </section>
         <section className="py-6">
           <h3 className="text-2xl">My Expenses</h3>
