@@ -5,10 +5,17 @@ import { useState, useRef, useEffect } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import Modal from "../components/Modal";
+import { FaRegTrashAlt } from "react-icons/fa";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 import { db } from "../lib/firebase/index.js";
-import { collection, addDoc, getDocs, doc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 const DUMMY = [
   {
     id: 1,
@@ -58,6 +65,17 @@ export default function Home() {
 
     try {
       const docSnap = await addDoc(collectionRef, newIncome);
+      setIncome((prevState) => {
+        return [
+          ...prevState,
+          {
+            id: docSnap.id,
+            ...newIncome,
+          },
+        ];
+      });
+      descriptionRef.current.value = "";
+      amountRef.current.value = "";
     } catch (error) {
       console.log(error.message);
     }
@@ -73,8 +91,8 @@ export default function Home() {
           return {
             id: doc.id,
             ...docData,
-            createdAt: docData.createdAt
-              ? new Date(docData.createdAt.toMillis())
+            createdAt: docData.createAt
+              ? new Date(docData.createAt.toMillis())
               : null,
           };
         });
@@ -88,6 +106,17 @@ export default function Home() {
     getIncomeData();
   }, []);
 
+  const deleteIncomeEntry = async (incomeID) => {
+    const docRef = doc(db, "income", incomeID);
+    try {
+      await deleteDoc(docRef);
+      setIncome((prevState) => {
+        return prevState.filter((i) => i.id != incomeID);
+      });
+    } catch {
+      console.log(error.message);
+    }
+  };
   return (
     <>
       <Modal show={showIncomeModal} onClose={setIncomeModal}>
@@ -120,6 +149,28 @@ export default function Home() {
         </form>
         <div className="flex flex-col gap-4 mt-6">
           <h3 className="text-2xl font-bold">Income History</h3>
+          {income.map((i) => {
+            return (
+              <div className="flex justify-between items-center" key={i.id}>
+                <div>
+                  <p className="font-semibold">{i.description}</p>
+                  <small className="text-xs">
+                    {i.createdAt?.toISOString()}
+                  </small>
+                </div>
+                <p className="flex items-center gap-2">
+                  {CurrencyFormatter(i.amount)}
+                  <button
+                    onClick={() => {
+                      deleteIncomeEntry(i.id);
+                    }}
+                  >
+                    <FaRegTrashAlt />
+                  </button>
+                </p>
+              </div>
+            );
+          })}
         </div>
       </Modal>
 
