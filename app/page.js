@@ -1,14 +1,14 @@
 "use client";
 import { CurrencyFormatter } from "../lib/utils";
 import ExpenseCatgeoryItem from "../components/ExpenseCategoryItem";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import Modal from "../components/Modal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-import { db } from "../lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { db } from "../lib/firebase/index.js";
+import { collection, addDoc, getDocs, doc } from "firebase/firestore";
 const DUMMY = [
   {
     id: 1,
@@ -37,6 +37,9 @@ const DUMMY = [
 ];
 
 export default function Home() {
+  const [income, setIncome] = useState([]);
+  console.log(income);
+
   const [showIncomeModal, setIncomeModal] = useState(false);
   const amountRef = useRef();
   const descriptionRef = useRef();
@@ -59,6 +62,31 @@ export default function Home() {
       console.log(error.message);
     }
   };
+  useEffect(() => {
+    const getIncomeData = async () => {
+      try {
+        const collectionRef = collection(db, "income");
+        const docsSnap = await getDocs(collectionRef);
+
+        const data = docsSnap.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            ...docData,
+            createdAt: docData.createdAt
+              ? new Date(docData.createdAt.toMillis())
+              : null,
+          };
+        });
+
+        setIncome(data);
+      } catch (error) {
+        console.error("Error fetching income data: ", error);
+      }
+    };
+
+    getIncomeData();
+  }, []);
 
   return (
     <>
@@ -90,6 +118,9 @@ export default function Home() {
             Add Entry
           </button>
         </form>
+        <div className="flex flex-col gap-4 mt-6">
+          <h3 className="text-2xl font-bold">Income History</h3>
+        </div>
       </Modal>
 
       <main className="container mx-auto px-6 py-6 max-w-2xl">
