@@ -1,12 +1,14 @@
 "use client";
 import { CurrencyFormatter } from "../lib/utils";
 import ExpenseCatgeoryItem from "../components/ExpenseCategoryItem";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import Modal from "../components/Modal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+import { db } from "../lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 const DUMMY = [
   {
     id: 1,
@@ -36,16 +38,39 @@ const DUMMY = [
 
 export default function Home() {
   const [showIncomeModal, setIncomeModal] = useState(false);
+  const amountRef = useRef();
+  const descriptionRef = useRef();
+
+  const addIncomeHandler = async (e) => {
+    e.preventDefault();
+
+    const newIncome = {
+      amount: amountRef.current.value,
+      description: descriptionRef.current.value,
+      createAt: new Date(),
+    };
+    console.log(newIncome);
+
+    const collectionRef = collection(db, "income");
+
+    try {
+      const docSnap = await addDoc(collectionRef, newIncome);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <>
       <Modal show={showIncomeModal} onClose={setIncomeModal}>
-        <form className="input-grp">
+        <form onSubmit={addIncomeHandler} className="input-grp">
           <div className="input-grp">
             <label htmlFor="amount"> Income Amount</label>
             <input
               className="px-4 py-2 bg-slate-600 rounded-xl"
               type="number"
               name="amount"
+              ref={amountRef}
               min={0.01}
               step={0.01}
               placeholder="Enter income amount"
@@ -56,6 +81,7 @@ export default function Home() {
             <input
               className="px-4 py-2 bg-slate-600 rounded-xl"
               name="description"
+              ref={descriptionRef}
               type="text"
               placeholder="Enter income descrition"
             />
@@ -90,6 +116,7 @@ export default function Home() {
             {DUMMY.map((expenses) => {
               return (
                 <ExpenseCatgeoryItem
+                  key={expenses.id}
                   color={expenses.color}
                   title={expenses.title}
                   total={expenses.total}
