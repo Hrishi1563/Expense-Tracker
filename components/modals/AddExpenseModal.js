@@ -1,12 +1,13 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import Modal from "../Modal";
 import { v4 as uuidv4 } from "uuid";
 import { financeContext } from "../../lib/store/finance-context";
 export default function AddExpenseModal({ show, onClose }) {
+  const titleRef = useRef();
   const [expenseAmount, setExpenseAmount] = useState("");
   const [selectedCategory, setCategory] = useState(null);
-  const { expenses } = useContext(financeContext);
-  const addExpenseHandler = () => {
+  const { expenses, addExpenseItem } = useContext(financeContext);
+  const addExpenseHandler = async () => {
     const expense = expenses.find((e) => {
       return e.id === selectedCategory;
     });
@@ -23,10 +24,14 @@ export default function AddExpenseModal({ show, onClose }) {
         },
       ],
     };
-    console.log(newExpense);
-    setExpenseAmount("");
-    setCategory(null);
-    onClose();
+    try {
+      await addExpenseItem(selectedCategory, newExpense);
+      setExpenseAmount("");
+      setCategory(null);
+      onClose();
+    } catch (error) {
+      console.log(error.message);
+    }
   };
   return (
     <Modal show={show} onClose={onClose}>
@@ -44,7 +49,14 @@ export default function AddExpenseModal({ show, onClose }) {
           }}
         />
       </div>
-      <h3 className="capitalize"> Select Expense Category </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="capitalize"> Select Expense Category </h3>
+        <button className="text-lime-400">+ New Category </button>
+      </div>
+      <div>
+        <input type="text" placeholder="Enter Title" ref={titleRef} />
+        <label> Pick color </label>
+      </div>
       {expenseAmount > 0 && (
         <div className="flex flex-col gap-4 mt-6">
           {expenses.map((expense) => {
