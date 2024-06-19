@@ -1,6 +1,5 @@
 import { useRef, useEffect, useContext } from "react";
 import { CurrencyFormatter } from "../../lib/utils";
-// import Modal from "../components/Modal";
 import Modal from "../Modal";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { financeContext } from "../../lib/store/finance-context";
@@ -14,7 +13,7 @@ export default function AddIncomeModal({ show, onClose }) {
     e.preventDefault();
 
     const newIncome = {
-      amount: amountRef.current.value,
+      amount: +amountRef.current.value,
       description: descriptionRef.current.value,
       createAt: new Date(),
     };
